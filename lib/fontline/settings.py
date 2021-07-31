@@ -30,6 +30,7 @@ font-line is a font vertical metrics reporting and line spacing modification too
 SUB-COMMANDS
 
   percent - adjust font line spacing to % of UPM value
+      if given % is negative, adjust only the ascender by the abs value of the given %
   report - generate report of font metrics and derived values
 
 OPTIONS

@@ -82,13 +82,12 @@ def main():
                 percent_int = int(
                     percent
                 )  # test that the argument can be cast to an integer value
-                if percent_int <= 0:
+                if percent_int == 0:
                     stderr(
-                        "[font-line] ERROR: Please enter a percent value that is "
-                        "greater than zero."
+                        "[font-line] ERROR: Please enter a non-zero percent value"
                     )
                     sys.exit(1)
-                if percent_int > 100:
+                if percent_int > 100 or percent_int < -100:
                     stdout(
                         "[font-line] Warning: You entered a percent value over 100%. "
                         "Please confirm that this is your intended metrics modification."

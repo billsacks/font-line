@@ -122,7 +122,17 @@ def modify_linegap_percent(fontpath, percent):
         hhea_ascdesc_delta = hhea_ascent + -(hhea_descent)
 
         # define percent UPM from command line request
-        factor = 1.0 * int(percent) / 100
+        percent_int = int(percent)
+        if percent_int < 0:
+            # Negative percent is interpreted as meaning only adjust the ascender. So,
+            # instead of adjusting both the ascender and descender by half the delta,
+            # we'll adjust the ascender by the full delta and leave the descender
+            # unmodified.
+            percent_int = abs(percent_int)
+            ascender_only = True
+        else:
+            ascender_only = False
+        factor = 1.0 * percent_int / 100
 
         # define line spacing units
         line_spacing_units = int(factor * units_per_em)
@@ -142,19 +152,33 @@ def modify_linegap_percent(fontpath, percent):
         if os2_typo_linegap == 0 and (os2_typo_ascdesc_delta > units_per_em):
             # define values
             os2_typo_ascender += upper_lower_add_units
-            os2_typo_descender -= upper_lower_add_units
+            if ascender_only:
+                os2_typo_ascender += upper_lower_add_units
+            else:
+                os2_typo_descender -= upper_lower_add_units
+
             hhea_ascent += upper_lower_add_units
-            hhea_descent -= upper_lower_add_units
+            if ascender_only:
+                hhea_ascent += upper_lower_add_units
+            else:
+                hhea_descent -= upper_lower_add_units
+
             os2_win_ascent = hhea_ascent
             os2_win_descent = -hhea_descent
         # Adobe metrics approach
         elif os2_typo_linegap == 0 and (os2_typo_ascdesc_delta == units_per_em):
             hhea_ascent += upper_lower_add_units
-            hhea_descent -= upper_lower_add_units
+            if ascender_only:
+                hhea_ascent += upper_lower_add_units
+            else:
+                hhea_descent -= upper_lower_add_units
+
             os2_win_ascent = hhea_ascent
             os2_win_descent = -hhea_descent
         else:
             os2_typo_linegap = line_spacing_units
+            if ascender_only:
+                raise ValueError("ascender_only not implemented for this option")
             hhea_ascent = int(os2_typo_ascender + 0.5 * os2_typo_linegap)
             hhea_descent = -(total_height - hhea_ascent)
             os2_win_ascent = hhea_ascent
